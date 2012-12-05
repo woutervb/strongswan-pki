@@ -1,0 +1,12 @@
+#!/bin/sh
+
+
+echo "Creating a selfsigned ca"
+
+./create_private_key ca
+ipsec pki --self --in caKey.der \
+	--dn "C=NL, O=vanbommelonline, CN=vanbommelonline CA" \
+	--ca --digest sha256 \
+	--lifetime 3650 > caCert.der
+
+openssl x509 -in caCert.der -inform der -out caCert.pem -outform pem

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+if [ $# -ne 1 ] ; then
+  echo "This script expects exactly 1 parameter,"
+  echo "the internet name for the gateway"
+  echo "Where the certificate is created for"
+  exit 1
+fi
+
+echo "Creating server certificate for domain $1"
+./create_private_key server
+
+ipsec pki --pub --in serverKey.der | ipsec pki --issue --cacert caCert.der \
+					--cakey caKey.der \
+                                     	--dn "C=NL, O=vanbommelonline, CN=$1" \
+					--flag serverAuth \
+					--flag ikeIntermediate \
+					--digest sha256 \
+					--san $1 > serverCert.der

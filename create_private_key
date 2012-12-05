@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ $# -ne 1 ] ; then
+  echo "This script expects exactly 1 parameter,"
+  echo "the basename for the certificate(s) that are"
+  echo "created, or where the csr is generated for."
+  exit 1
+fi
+
+echo "Creating a private key with basename $1"
+ipsec pki --gen > ${1}Key.der

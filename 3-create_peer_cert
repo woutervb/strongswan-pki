@@ -1,0 +1,27 @@
+#!/bin/sh
+
+if [ $# -ne 1 ] ; then
+  echo "This script expects exactly 1 parameter,"
+  echo "the name for the peer"
+  echo "Where the certificate is created for"
+  exit 1
+fi
+
+echo "Creating peer certificate for $1"
+
+./create_private_key $1
+openssl rsa -in ${1}Key.der -inform der -out ${1}Key.pem -outform pem
+rm ${1}Key.der
+ipsec pki --pub --in ${1}Key.pem | ipsec pki --issue --cacert caCert.der \
+					--cakey caKey.der \
+                                     	--dn "C=NL, O=vanbommelonline, CN=$1" \
+					--digest sha256 \
+					--outform pem > ${1}Cert.pem
+RANDFILE="${HOME}/.strongswan-rnd"
+touch ${RANDFILE}
+export RANDFILE
+
+openssl pkcs12 -export -inkey ${1}Key.pem -in ${1}Cert.pem -name "${1}" \
+	-chain -CAfile caCert.pem -nodes \
+	-caname "vanbommelonline CA" -out ${1}Cert.p12 
+
